@@ -73,6 +73,7 @@
 
 \pgfdeclareimage[width=0.12\paperwidth]{logo}{assets/bnu_logo}
 \pgfdeclareimage[width=0.12\paperwidth]{whitelogo}{assets/bnu_logo_negative}
+\pgfdeclareimage[width=0.4\paperwidth]{titlelogo}{assets/bnu_logo_name_blue}
 \newcommand{\@logo}{logo}
 
 % Set colours
@@ -130,10 +131,18 @@
 	\endgroup
 }
 
-% Put the logo in each slide's top right area (except backmatter)
+% Put the logo in each slide's top right area (except backmatter and title page)
+% Title page (frame 1): logo at top left
+% Other pages: logo at top right
 \setbeamertemplate{headline}{%
   \ifnum\insertframenumber<\inserttotalframenumber
-    \hfill\pgfuseimage{\@logo}\hspace{0.06\textwidth}%
+    \ifnum\insertframenumber=1
+      % Title page: logo at top left
+      \hspace{0.06\textwidth}\pgfuseimage{titlelogo}\hfill%
+    \else
+      % Other pages: logo at top right
+      \hfill\pgfuseimage{\@logo}\hspace{0.06\textwidth}%
+    \fi
   \fi
 }
 
@@ -154,18 +163,17 @@
 
 % Define the title page
 \setbeamertemplate{title page}{%
-  % Add BNU logo at bottom left using TikZ overlay
+  % Add BNU logo at bottom right using TikZ overlay
   \begin{tikzpicture}[remember picture, overlay]
-    \node[anchor=south west, inner sep=0pt] at ($(current page.south west)+(0.5cm,0.5cm)$) {
-      \includegraphics[width=0.35\paperwidth]{assets/bnu-logo-name.png}
+    \node[anchor=south east, inner sep=0pt] at ($(current page.south east)+(-0.5cm,0.3cm)$) {
+      \includegraphics[width=0.45\paperwidth]{assets/bnu-jsxt.png}
     };
   \end{tikzpicture}
-  \vskip0pt plus 1filll%
-  % Title text on the right side without background block
-  \hfill
-  \vspace{20mm}
-  \begin{minipage}[t]{0.6\textwidth}
-    \raggedleft
+  % Title text on the left side (left aligned), positioned higher and more to the left
+  \vspace{-5mm}
+  \hspace{1.5cm}
+  \begin{minipage}[t]{0.55\textwidth}
+    \raggedright
     {\usebeamercolor[fg]{title}\usebeamerfont{title}\inserttitle}
     
     \vspace{2mm}
@@ -175,23 +183,27 @@
     {\usebeamercolor[fg]{subtitle}\usebeamerfont{subtitle}\@courseLabel}
     
     \vspace{4mm}
-    {\usebeamercolor[fg]{author}\usebeamerfont{author}\textbf{\insertauthor} \ifdefempty{\@IDnumber}{}{(\@IDnumber)}}
+    {\usebeamercolor[fg]{author}\usebeamerfont{author}\textbf{\insertauthor} \ifdefempty{\@IDnumber}{}{\@IDnumber}}
   
     \vspace{2mm}
     {\usebeamercolor[fg]{date}\usebeamerfont{date}\insertdate}
   \end{minipage}
-  \hspace{1cm}
 }
 
 % Define slide splitting dimensions (e.g. title and chapter slides)
 \newcommand{\TikzSplitSlide}[1]{%
   \begin{tikzpicture}[remember picture, overlay]
-    % Clip region with diagonal edge (reversed slope)
+    % Fill left side with main color (blue background) - diagonal from top-left going right
+    \fill[maincolor] (current page.north west) -- 
+          ($(current page.north west)!0.3!(current page.north east)$) -- 
+          ($(current page.south west)!0.5!(current page.south east)$) -- 
+          (current page.south west) -- cycle;
+    % Optional: add image on top of the colored area
     \clip (current page.north west) -- 
           ($(current page.north west)!0.3!(current page.north east)$) -- 
           ($(current page.south west)!0.5!(current page.south east)$) -- 
-          (current page.south west) -- cycle; 
-    \node[anchor=center] at ($(current page.west)!0.25!(current page.east)$) {%
+          (current page.south west) -- cycle;
+    \node[anchor=center, opacity=0.3] at ($(current page.west)!0.25!(current page.east)$) {%
       \includegraphics[height=\paperheight]{#1}%
     };
   \end{tikzpicture}
@@ -320,8 +332,11 @@
 \AtBeginSection[]
 {
     \begingroup
-    \themecolor{main}
-    \begin{frame}{Table of Contents}
+    \setbeamercolor{frametitle}{fg=maincolor}
+    \setbeamercolor{section in toc}{fg=maincolor}
+    \setbeamercolor{subsection in toc}{fg=darkgray}
+    \setbeamercolor{normal text}{fg=darkgray,bg=white}
+    \begin{frame}{目录}
         \tableofcontents[currentsection]
     \end{frame}
     \endgroup
